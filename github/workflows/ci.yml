@@ -1,0 +1,48 @@
+name: Sequential Workflow
+on: [pull request]
+  jobs:
+    build:
+      runs-on: windows-latest
+      strategy:
+        matrix:
+          configuration: [Release, Debug]
+      steps:
+        - name: Chackout code
+          uses: actions/checkout@v4
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: '6.0.x'
+        - name: Build project
+          run: dotnet build CalculatorTest/CalculatorTest.csproj --configuration ${{matrix.configuration }}
+        - name: Save artifacts
+          run: dotnet publish CalculatorTest/CalculatorTest.csproj --configuration ${{ matrix.configuration }} --output ./publish/${{ matrix.configuration }} --no-build
+        - name: Upload build artifacts
+          uses: actions/upload-artifact@v4
+          with:
+            name: calculator-${{ matrix.configuration }}-build
+            path: |
+              CalculatorTest/bin/${{ matrix.configuration }}/
+              CalculatorTest/obj/${{ matrix.configuration }}/
+              publish/${{ matrix.configuration }}/
+              
+    test:
+      needs: build
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          configuration: [Debug, Release]
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+      - name: Run tests
+        run: dotnet test CalculatorTest/CalculatorTest.Tests.csproj --configuration ${{matrix.configuration }} --no-build
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.configuration }}
+          path: TestResults/
