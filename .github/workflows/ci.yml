@@ -1,4 +1,4 @@
-name: Sequential Workflow
+name: Parallel Workflow
 on: [push]
 jobs:
     build:
@@ -15,9 +15,17 @@ jobs:
 
     test:
       needs: build
-      runs-on: windows-latest
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          configuration: [Debug, Release]
       steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
       - name: Run tests
-        run: dotnet test CalculatorTest/CalculatorTest.csproj
+        run: dotnet test CalculatorTest/CalculatorTest.csproj --configuration ${{matrix.configuration }}
+
