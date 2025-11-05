@@ -20,4 +20,4 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run tests
-        run: dotnet test CalculatorTest/CalculatorTest.Tests.csproj
+        run: dotnet test CalculatorTest/CalculatorTest.csproj
