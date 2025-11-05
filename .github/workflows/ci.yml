@@ -1,4 +1,4 @@
-name: Parallel Workflow
+name: Combined Workflow
 on: [push]
 jobs:
     build:
@@ -29,3 +29,11 @@ jobs:
       - name: Run tests
         run: dotnet test CalculatorTest/CalculatorTest.csproj --configuration ${{matrix.configuration }}
 
+    analyze:
+      needs: build
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run code analysis
+        run: dotnet tool install -g dotnet-format && dotnet format CalculatorTest/CalculatorTest.csproj
